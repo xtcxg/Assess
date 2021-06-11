@@ -1,5 +1,7 @@
 package com.miex.domain;
 
+import com.miex.util.anno.Id;
+import com.miex.util.anno.Index;
 import lombok.Data;
 
 import java.util.List;
@@ -8,8 +10,10 @@ import java.util.List;
  * 索引 product 的 po
  */
 @Data
-public
-class Product {
+@Index("product")
+public class Product {
+
+    @Id
     String prodId;//产品id
     String prodName;//产品完整名称
     List<String> prodAlias ;// [别名列表]

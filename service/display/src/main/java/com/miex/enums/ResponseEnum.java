@@ -2,8 +2,9 @@ package com.miex.enums;
 
 public enum ResponseEnum {
     SUCCESS(0,"success"),
-    ES_OPERATION_FAIL(1001,"elasticsearch operation failed"),
-    PARAMS_VALID_FAIL(2001,"Parameter verification failed");
+    SYSTEM_ERROR(1001,"system internal exception"),
+    ES_OPERATION_FAIL(2001,"elasticsearch operation failed"),
+    PARAMS_VALID_FAIL(3001,"parameter verification failed");
 
     Integer code;
     String msg;
