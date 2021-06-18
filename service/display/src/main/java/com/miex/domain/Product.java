@@ -13,7 +13,7 @@ import java.util.List;
 @Index("product")
 public class Product {
 
-    @Id
+    @Id(strategy = Id.STRATEGY_INCR)
     String prodId;//产品id
     String prodName;//产品完整名称
     List<String> prodAlias ;// [别名列表]

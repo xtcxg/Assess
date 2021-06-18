@@ -8,5 +8,16 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Id {
+    static String STRATEGY_RANDOM = "RANDOM";
+    static String STRATEGY_INCR = "INCR";
+    static String STRATEGY_SNOWFLAKE = "SNOWFLAKE";
+
     String value() default "";
+
+    /**
+     * id生成策略，
+     * @return
+     */
+    String strategy() default "RANDOM";
+
 }

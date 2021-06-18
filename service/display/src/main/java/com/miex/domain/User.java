@@ -12,9 +12,10 @@ import java.util.List;
 @Data
 @Index("user")
 public class User {
-    String nikeName;
-    @Id
+    @Id(strategy = Id.STRATEGY_RANDOM)
     String userId;
+
+    String nikeName;
     String phoneNum;
     String password;
     Integer prodNum;
