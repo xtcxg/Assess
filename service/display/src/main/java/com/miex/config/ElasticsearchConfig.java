@@ -20,5 +20,4 @@ public class ElasticsearchConfig {
                         new HttpHost(host, 9200, "http"),
                         new HttpHost(host, 9201, "http")));
     }
-
 }

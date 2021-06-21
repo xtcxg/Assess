@@ -16,8 +16,17 @@ public class Product {
     @Id(strategy = Id.STRATEGY_INCR)
     String prodId;//产品id
     String prodName;//产品完整名称
+    /**
+     * 所属品牌
+     */
+    String underBrand;
+    /**
+     *所属系列
+     */
+    String underSeries;
     List<String> prodAlias ;// [别名列表]
     String ownerId;//所有者id
+    String ownerName;
     String createTime;//产品实际创建时间
     String insertTime;//录入系统时间
     String updateTime;//最后更新时间

@@ -2,25 +2,27 @@ package com.miex.domain.dao;
 
 import com.alibaba.fastjson.JSONObject;
 import com.miex.exception.ESException;
+import com.miex.util.StringUtil;
 import com.miex.util.anno.Id;
 import com.miex.util.anno.Index;
-import org.apache.http.client.methods.RequestBuilder;
+import org.elasticsearch.ElasticsearchStatusException;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.update.UpdateRequest;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.core.CountRequest;
+import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.aggregations.AggregationBuilders;
-import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
-import org.elasticsearch.search.aggregations.metrics.TopHitsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortOrder;
@@ -31,6 +33,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -64,20 +67,25 @@ public abstract class ElasticsearchDAO<T> {
      * @return IndexResponse 插入结果
      * @throws ESException
      */
-    public IndexResponse insert(T t) throws ESException {
+    public String insert(T t) throws ESException {
         IndexRequest indexRequest = new IndexRequest(index);
-        indexRequest.source(JSONObject.toJSONString(t), XContentType.JSON);
         try{
             indexRequest.id(getId(t));
-            return highClient.index(indexRequest, RequestOptions.DEFAULT);
+            indexRequest.source(JSONObject.toJSONString(t), XContentType.JSON);
+            return highClient.index(indexRequest, RequestOptions.DEFAULT).getId();
         } catch (IOException e) {
             e.printStackTrace();
             throw new ESException("插入数据出错：" + JSONObject.toJSONString(t),e.getCause());
         }
     }
 
-    // 通过注解信息
-    String getId(T t) throws IOException{
+    /**
+     * 通过@Id注解，获取id，如果对象有id，则返回已有的id，如果没有id，则根据注解策略生成id
+     * @param t 获取id的对象
+     * @return 对象的id
+     * @throws ESException
+     */
+    String getId(T t) throws ESException{
         String id = null;
         try {
             Field[] fields = t.getClass().getDeclaredFields();
@@ -86,35 +94,44 @@ public abstract class ElasticsearchDAO<T> {
                     String fieldName = field.getName();
                     String methodName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
                     id = (String) t.getClass().getMethod(methodName).invoke(t,new Object[]{});
+                    methodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 
-                    if (null == id || "".equals(id)) {
+                    if (!StringUtil.isEmpty(id)) {
                         return id;
                     }else{
                         Id anno = field.getAnnotation(Id.class);
                         String strategy = anno.strategy();
                         if (Id.STRATEGY_INCR.equals(strategy)){
-                            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-
-                            TermsAggregationBuilder termsAggregation = AggregationBuilders
-                                    .terms("id_hits")
-                                    .field(fieldName + ".keyword")
-                                    .size(1);
-                            searchSourceBuilder.aggregation(termsAggregation);
-
-                            FieldSortBuilder fieldSortBuilder = new FieldSortBuilder(fieldName + ".keyword").order(SortOrder.DESC);
-                            searchSourceBuilder.sort(fieldSortBuilder);
-
-                            SearchRequest searchRequest = new SearchRequest(index);
-                            searchRequest.source(searchSourceBuilder);
-
-                            SearchResponse searchResponse = highClient.search(searchRequest,RequestOptions.DEFAULT);
-                            SearchHit searchHit = searchResponse.getHits().getAt(0);
-                            if (null == searchHit) {
+                            CountRequest countRequest = new CountRequest(index);
+                            CountResponse countResponse = highClient.count(countRequest,RequestOptions.DEFAULT);
+                            if (countResponse.getCount() < 1) {
                                 id = "000000000001";
                             } else {
+                                SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+                                FieldSortBuilder fieldSortBuilder = new FieldSortBuilder(fieldName + ".keyword").order(SortOrder.DESC);
+                                searchSourceBuilder.sort(fieldSortBuilder);
+                                searchSourceBuilder.size(1);
+                                SearchRequest searchRequest = new SearchRequest(index);
+                                searchRequest.source(searchSourceBuilder);
+                                SearchResponse searchResponse = highClient.search(searchRequest,RequestOptions.DEFAULT);
+                                SearchHit searchHit = searchResponse.getHits().getAt(0);
                                 JSONObject json = JSONObject.parseObject(searchHit.getSourceAsString());
                                 id = String.valueOf(json.getLong(fieldName) + 1);
+                                id = "000000000000".substring(0,12 - id.length()) + id;
                             }
+                            t.getClass().getMethod(methodName,String.class).invoke(t, id);
+                            return id;
+                        }
+                        if (Id.STRATEGY_RANDOM.equals(strategy)){
+                            id = UUID.randomUUID().toString().replace("-","");
+                            t.getClass().getMethod(methodName,String.class).invoke(t, id);
+                            return id;
+                        }
+                        if (Id.STRATEGY_SNOWFLAKE.equals(strategy)){
+                            // todo 实现snowflake
+                            id = UUID.randomUUID().toString().replace("-","");
+                            t.getClass().getMethod(methodName,String.class).invoke(t, id);
+                            return id;
                         }
                     }
                     break;
@@ -122,18 +139,29 @@ public abstract class ElasticsearchDAO<T> {
             }
 
             if (null == id){
-                throw new IOException("未检测到 \"@Id\" 注解，原始数据：" + JSONObject.toJSONString(t));
+                throw new ESException("未检测到 \"@Id\" 注解，原始数据：" + JSONObject.toJSONString(t));
             }
-        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException e){
+        } catch (InvocationTargetException | IllegalAccessException | NoSuchMethodException | IOException e){
             e.printStackTrace();
-            throw new IOException("数据解析出错：" + JSONObject.toJSONString(t),e);
+            throw new ESException("数据解析出错：" + JSONObject.toJSONString(t),e);
         }
         return id;
     }
 
-//    public IndexResponse deleteById(String id){
-//
-//    }
+    public String deleteById(String id) throws ESException {
+        DeleteRequest deleteRequest = new DeleteRequest(index,id);
+        try {
+            DeleteResponse deleteResponse = highClient.delete(deleteRequest,RequestOptions.DEFAULT);
+            if ("deleted".equals(deleteResponse.getResult().getLowercase())){
+                return "success";
+            } else {
+                return deleteResponse.getResult().getLowercase();
+            }
+        } catch (IOException e) {
+            throw new ESException(String.format("数据删除失败，index：%s，id：%s。%s",index,id ,e.getCause()),e);
+        }
+
+    }
 
     public T selectById(String id) throws ESException{
         GetRequest request = new GetRequest(index,id);
@@ -168,4 +196,21 @@ public abstract class ElasticsearchDAO<T> {
             throw new ESException("单条查询出错：" + t.toString(),e);
         }
     }
+
+    public String updateById(T t) throws ESException {
+        String id = getId(t);
+        UpdateRequest request = new UpdateRequest(index,id);
+        request.doc(JSONObject.toJSONString(t),XContentType.JSON);
+        try {
+            UpdateResponse response = highClient.update(request,RequestOptions.DEFAULT);
+            if ("updated".equals(response.getResult().getLowercase())){
+                return "success";
+            } else {
+                return response.getResult().getLowercase();
+            }
+        } catch (ElasticsearchStatusException | IOException e) {
+            throw new ESException(String.format("更新出错：index：%s,data: %s" ,index,JSONObject.toJSONString(t)));
+        }
+    }
+
 }

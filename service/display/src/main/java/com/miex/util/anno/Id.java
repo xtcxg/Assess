@@ -8,8 +8,17 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Id {
+    /**
+     * UUID
+     */
     static String STRATEGY_RANDOM = "RANDOM";
+    /**
+     * auto incr
+     */
     static String STRATEGY_INCR = "INCR";
+    /**
+     * snowflake
+     */
     static String STRATEGY_SNOWFLAKE = "SNOWFLAKE";
 
     String value() default "";
