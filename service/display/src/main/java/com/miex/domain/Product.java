@@ -31,7 +31,8 @@ public class Product {
     String insertTime;//录入系统时间
     String updateTime;//最后更新时间
     List<String> prodTags ;// [标签列表]
-    String broadCategory;//所属大类
-    List<String> subCategories ;// [细类列表]
-    List<String> evaluate ;// [评价标签列表]
+    String broadCategory;   // 大类
+    String subCategory ;    // 细类
+    String lastCategory;    // 末类
+    List<String> evaluate ; // [评价标签列表]
 }

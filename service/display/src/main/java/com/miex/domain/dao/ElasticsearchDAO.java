@@ -1,6 +1,7 @@
 package com.miex.domain.dao;
 
 import com.alibaba.fastjson.JSONObject;
+import com.miex.domain.dto.UnifiedRequest;
 import com.miex.exception.ESException;
 import com.miex.util.StringUtil;
 import com.miex.util.anno.Id;
@@ -11,8 +12,7 @@ import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.*;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -20,7 +20,10 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 import org.elasticsearch.client.core.CountResponse;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -33,6 +36,8 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -96,7 +101,7 @@ public abstract class ElasticsearchDAO<T> {
                     id = (String) t.getClass().getMethod(methodName).invoke(t,new Object[]{});
                     methodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
 
-                    if (!StringUtil.isEmpty(id)) {
+                    if (StringUtil.isNotEmpty(id)) {
                         return id;
                     }else{
                         Id anno = field.getAnnotation(Id.class);
@@ -213,4 +218,51 @@ public abstract class ElasticsearchDAO<T> {
         }
     }
 
+    public List<T> selectUseOr(UnifiedRequest<T> param) throws ESException {
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(param.getData()));
+        jo.forEach((k,v)->{
+            if(StringUtil.isNotEmpty(String.valueOf(v))){
+                boolQueryBuilder.should(QueryBuilders.termQuery(k,v));
+            }
+        });
+        try {
+            return boolQueryTemplate(boolQueryBuilder,param.getPage(), param.getSize());
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new ESException("OR 列表查询出错,data:" + JSONObject.toJSONString(param),e);
+        }
+    }
+
+    public List<T> selectUseAnd(UnifiedRequest<T> param) throws ESException {
+
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+        JSONObject jo = JSONObject.parseObject(JSONObject.toJSONString(param.getData()));
+        jo.forEach((k,v)->{
+            if(StringUtil.isNotEmpty(String.valueOf(v))){
+                boolQueryBuilder.must(QueryBuilders.termQuery(k,v));
+            }
+        });
+        try {
+            return boolQueryTemplate(boolQueryBuilder,param.getPage(), param.getSize());
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new ESException("AND 列表查询出错,data:" + JSONObject.toJSONString(param),e);
+        }
+    }
+
+    public List<T> boolQueryTemplate(BoolQueryBuilder boolQueryBuilder,Integer page,Integer size) throws IOException {
+        SearchRequest request = new SearchRequest(index);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().query(boolQueryBuilder);
+        searchSourceBuilder.size(size);
+        searchSourceBuilder.from(page * size);
+        request.source(searchSourceBuilder);
+        SearchResponse response = highClient.search(request,RequestOptions.DEFAULT);
+        List<T> list = new ArrayList<>();
+        response.getHits().forEach((hit)->{
+            list.add(JSONObject.parseObject(hit.getSourceAsString(),entityClass));
+        });
+        return list;
+    }
 }

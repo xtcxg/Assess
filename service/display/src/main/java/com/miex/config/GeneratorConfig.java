@@ -29,7 +29,7 @@ public class GeneratorConfig {
      */
     @Bean
     public void elasticsearchGenerator() throws IOException {
-        if (null == index || index.length < 1 || StringUtil.isEmpty(index[0])) return;
+        if (null == index || index.length < 1 || !StringUtil.isNotEmpty(index[0])) return;
         GetIndexRequest getIndexRequest = new GetIndexRequest(index[0]);
         if (highLevelClient.indices().exists(getIndexRequest, RequestOptions.DEFAULT)) return;
         for (String i:index) {

@@ -2,6 +2,7 @@ package com.miex.rest;
 
 import com.miex.domain.Product;
 import com.miex.domain.dao.impl.ProductDAO;
+import com.miex.domain.dto.UnifiedRequest;
 import com.miex.domain.dto.UnifiedResponse;
 import com.miex.exception.ESException;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotEmpty;
-import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -36,8 +36,8 @@ public class ProductRest {
     }
 
     @PostMapping("select-list")
-    public UnifiedResponse<List<Product>> selectList(@RequestBody Product product) throws IOException {
-        return null;
+    public UnifiedResponse<List<Product>> selectList(@RequestBody UnifiedRequest<Product> request) throws ESException {
+        return new UnifiedResponse<>(productDAO.selectUseOr(request));
     }
 
     @PostMapping("delete-by-id")

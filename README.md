@@ -19,7 +19,8 @@ assess
   "updateTime": "最后更新时间",
   "prodTags": ["标签列表"],
   "broadCategory": "产品大类",
-  "subCategories": ["细类列表"],
+  "subCategory": "产品子类",
+  "lastCategory": "产品末类",
   "evaluate": ["评价标签列表"],
   "prodParams": {}
 }
