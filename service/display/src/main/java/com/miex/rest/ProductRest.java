@@ -49,4 +49,9 @@ public class ProductRest {
     public UnifiedResponse<String> updateById(@RequestBody Product product) throws ESException {
         return new UnifiedResponse<>(productDAO.updateById(product));
     }
+
+    @PostMapping("select-all")
+    public UnifiedResponse<List<Product>> selectAll(@RequestBody UnifiedRequest<String> param) throws ESException {
+        return new UnifiedResponse<>(productDAO.selectOnFields(param));
+    }
 }

@@ -5,6 +5,7 @@ import com.miex.util.anno.Index;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 索引 product 的 po
@@ -35,4 +36,5 @@ public class Product {
     String subCategory ;    // 细类
     String lastCategory;    // 末类
     List<String> evaluate ; // [评价标签列表]
+    Map<String,Map<String,Object>> prodParams;
 }

@@ -24,6 +24,7 @@ import org.elasticsearch.common.xcontent.XContentParser;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MultiMatchQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -228,7 +229,7 @@ public abstract class ElasticsearchDAO<T> {
             }
         });
         try {
-            return boolQueryTemplate(boolQueryBuilder,param.getPage(), param.getSize());
+            return queryTemplate(boolQueryBuilder,param.getPage(), param.getSize());
         } catch (IOException e) {
             e.printStackTrace();
             throw new ESException("OR 列表查询出错,data:" + JSONObject.toJSONString(param),e);
@@ -245,16 +246,16 @@ public abstract class ElasticsearchDAO<T> {
             }
         });
         try {
-            return boolQueryTemplate(boolQueryBuilder,param.getPage(), param.getSize());
+            return queryTemplate(boolQueryBuilder,param.getPage(), param.getSize());
         } catch (IOException e) {
             e.printStackTrace();
             throw new ESException("AND 列表查询出错,data:" + JSONObject.toJSONString(param),e);
         }
     }
 
-    public List<T> boolQueryTemplate(BoolQueryBuilder boolQueryBuilder,Integer page,Integer size) throws IOException {
+    public List<T> queryTemplate(QueryBuilder queryBuilder, Integer page, Integer size) throws IOException {
         SearchRequest request = new SearchRequest(index);
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().query(boolQueryBuilder);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().query(queryBuilder);
         searchSourceBuilder.size(size);
         searchSourceBuilder.from(page * size);
         request.source(searchSourceBuilder);
