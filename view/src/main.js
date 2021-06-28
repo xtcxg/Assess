@@ -15,6 +15,7 @@ app.config.globalProperties.host = host;
 app.config.globalProperties.addrs = {
     product:{
         selectAll: host + "/product/select-all",
-        selectById: host + "/product/select-by-id"
+        selectById: host + "/product/select-by-id",
+        add: host + "/product/add"
     }
 }
