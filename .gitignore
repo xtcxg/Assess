@@ -1,7 +1,7 @@
 # Compiled class file
 *.class
 *.idea
-.DS_Store
+*.DS_Store
 *.idea/vcs.xml
 # Log file
 *.log
@@ -26,10 +26,8 @@ hs_err_pid*
 
 
 #
-/view/.DS_Store
 /view/node_modules/
 /view/dist/
-
 
 # local env files
 /view/.env.local
@@ -43,8 +41,8 @@ hs_err_pid*
 
 # Editor directories and files
 /view/.idea
-.vscode
-*.suo
+/view/.vscode
+/view/*.suo
 *.ntvs*
 *.njsproj
 *.sln
