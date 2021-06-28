@@ -14,6 +14,7 @@ const host = "http://127.0.0.1:777";
 app.config.globalProperties.host = host;
 app.config.globalProperties.addrs = {
     product:{
-        selectAll: host + "/product/select-all"
+        selectAll: host + "/product/select-all",
+        selectById: host + "/product/select-by-id"
     }
 }
