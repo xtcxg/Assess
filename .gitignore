@@ -1,6 +1,7 @@
 # Compiled class file
 *.class
 *.idea
+*.DS_Store
 *.idea/vcs.xml
 # Log file
 *.log
@@ -22,3 +23,27 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+
+
+#
+/view/node_modules/
+/view/dist/
+
+# local env files
+/view/.env.local
+/view/.env.*.local
+
+# Log files
+/view/npm-debug.log*
+/view/yarn-debug.log*
+/view/yarn-error.log*
+/view/pnpm-debug.log*
+
+# Editor directories and files
+/view/.idea
+/view/.vscode
+/view/*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
