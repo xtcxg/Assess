@@ -3,6 +3,10 @@
 *.idea
 *.DS_Store
 *.idea/vcs.xml
+*/target/*
+product/*/target/
+user/*/target/
+*.lst
 # Log file
 *.log
 
