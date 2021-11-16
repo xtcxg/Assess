@@ -3,6 +3,8 @@ package com.miex.product.rest;
 import com.miex.domain.dto.res.Response;
 import com.miex.product.api.ProductApi;
 import com.miex.product.domain.entity.Product;
+import com.miex.product.service.ProductService;
+import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,8 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("product")
 public class ProductRest {
 
-	@Qualifier("productService")
-	@Autowired
+	@Reference
 	ProductApi productApi;
 
 	@PutMapping("/add")

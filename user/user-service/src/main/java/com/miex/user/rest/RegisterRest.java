@@ -6,6 +6,7 @@ import com.miex.product.domain.entity.Product;
 import com.miex.user.api.RegisterApi;
 import com.miex.user.domain.entity.User;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.dubbo.config.annotation.Reference;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +26,7 @@ public class RegisterRest {
 	@Autowired
 	RegisterApi registerApi;
 
-	@Autowired
+	@Reference
 	ProductApi productApi;
 
 	@PostMapping("/")
