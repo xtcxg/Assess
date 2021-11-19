@@ -39,8 +39,8 @@ assess
 * 产品所有者：可以操作(product)
 ```json
 {
-  "nikeName": "昵称",
   "userId": "用户id",
+  "nickName": "昵称",
   "userType": "(int)用户类型",
   "phoneNum": "手机号",
   "password": "密码",

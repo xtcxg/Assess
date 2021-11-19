@@ -1,6 +1,9 @@
 package com.miex.user.domain.entity;
 
+import com.miex.anno.Id;
 import lombok.Data;
+
+import java.util.List;
 
 /**
  * @author liutz
@@ -9,6 +12,12 @@ import lombok.Data;
 @Data
 public class User {
 
-	Integer id;
-	String name;
+	@Id
+	Integer userId;
+	String nickName;
+	String phoneNum;
+	String password;
+	Integer prodNum;
+	List<String> prodTags;
+	String introduce;
 }

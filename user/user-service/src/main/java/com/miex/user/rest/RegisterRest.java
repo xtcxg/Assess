@@ -32,7 +32,6 @@ public class RegisterRest {
 	@PostMapping("/")
 	public Response<Boolean> register(@RequestBody User user) {
 		Boolean res = registerApi.register();
-		productApi.add(new Product());
 		return new Response<>(res);
 	}
 }
