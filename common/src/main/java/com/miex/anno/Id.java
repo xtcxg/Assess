@@ -9,15 +9,15 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface Id {
     /**
-     * UUID
+     * UUID，String
      */
     static String STRATEGY_RANDOM = "RANDOM";
     /**
-     * auto incr
+     * auto incr,Long
      */
     static String STRATEGY_INCR = "INCR";
     /**
-     * snowflake
+     * snowflake,Long
      */
     static String STRATEGY_SNOWFLAKE = "SNOWFLAKE";
 

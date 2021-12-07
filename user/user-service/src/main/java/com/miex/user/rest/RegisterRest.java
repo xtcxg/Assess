@@ -26,12 +26,18 @@ public class RegisterRest {
 	@Autowired
 	RegisterApi registerApi;
 
-	@Reference
+	@Reference(lazy = true,check = false)
 	ProductApi productApi;
 
 	@PostMapping("/")
 	public Response<Boolean> register(@RequestBody User user) {
-		Boolean res = registerApi.register();
+		Boolean res = registerApi.register(user);
 		return new Response<>(res);
+	}
+
+	@PostMapping("/login")
+	public Response<String> login(@RequestBody User user) {
+		String token = registerApi.login(user);
+		return new Response<>(token);
 	}
 }

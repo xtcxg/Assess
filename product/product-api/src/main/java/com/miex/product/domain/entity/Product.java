@@ -5,6 +5,7 @@ import com.miex.anno.Index;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -29,9 +30,9 @@ public class Product implements Serializable {
     List<String> prodAlias ;// [别名列表]
     String ownerId;//所有者id
     String ownerName;
-    String createTime;//产品实际创建时间
-    String insertTime;//录入系统时间
-    String updateTime;//最后更新时间
+    Date createTime;//产品实际创建时间
+    Date insertTime;//录入系统时间
+    Date updateTime;//最后更新时间
     List<String> prodTags ;// [标签列表]
     String broadCategory;   // 大类
     String subCategory ;    // 细类

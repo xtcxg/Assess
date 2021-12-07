@@ -57,7 +57,7 @@ public abstract class ElasticsearchDAO<T> {
     public String index;
 
     @Autowired
-    RestHighLevelClient highClient;
+    public RestHighLevelClient highClient;
 
     @PostConstruct
     public void construct(){
