@@ -22,6 +22,11 @@
             <artifactId>product-api</artifactId>
             <version>${product.api.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.versiion}</version>
+        </dependency>
     </dependencies>
 
 </project>
