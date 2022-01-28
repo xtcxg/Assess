@@ -1,6 +1,6 @@
 package com.miex.domain.dto.res;
 
-import com.miex.enums.ResponseEnum;
+import com.miex.enums.RequestEnum;
 import lombok.Data;
 
 import java.text.SimpleDateFormat;
@@ -8,8 +8,8 @@ import java.util.Date;
 
 @Data
 public class Response<T> {
-    Integer code = ResponseEnum.SUCCESS.getCode();
-    String msg = ResponseEnum.SUCCESS.getMsg();
+    Integer code = RequestEnum.SUCCESS.getCode();
+    String msg = RequestEnum.SUCCESS.getMsg();
     Integer count;
     Integer page;
     Integer size;
@@ -34,7 +34,7 @@ public class Response<T> {
      * 有失败类型，无具体失败原因
      * @param r 失败类型
      */
-    public Response(ResponseEnum r){
+    public Response(RequestEnum r){
         this.code = r.getCode();
         this.msg = r.getMsg();
     }
@@ -44,10 +44,22 @@ public class Response<T> {
      * @param r 失败类型
      * @param error 具体原因
      */
-    public Response(ResponseEnum r, String error){
+    public Response(RequestEnum r, String error){
         this.code = r.getCode();
         this.msg = r.getMsg();
         this.error = error;
+    }
+
+    /**
+     * 默认的失败情况，code = 5001
+     * @param msg 错误信息
+     * @return
+     */
+    public Response<String> fail(String msg) {
+        Response<String> response = new Response<>();
+        response.setCode(5001);
+        response.setMsg(msg);
+        return response;
     }
 
     /**

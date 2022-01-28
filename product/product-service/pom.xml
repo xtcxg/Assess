@@ -23,6 +23,11 @@
             <version>${product.api.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.miex</groupId>
+            <artifactId>user-api</artifactId>
+            <version>${user.api.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.versiion}</version>

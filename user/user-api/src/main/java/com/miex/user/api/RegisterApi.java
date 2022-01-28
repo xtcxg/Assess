@@ -10,4 +10,6 @@ public interface RegisterApi {
 	Boolean register(User user);
 
 	String login(User user);
+
+	User getUserInfo(String userId);
 }

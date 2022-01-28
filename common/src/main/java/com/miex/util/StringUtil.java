@@ -13,4 +13,11 @@ public class StringUtil {
             return true;
         }
     }
+    public static Boolean isEmpty(String str){
+        if (null == str || "".equals(str.trim())){
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

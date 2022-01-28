@@ -4,6 +4,7 @@ import com.miex.anno.Id;
 import com.miex.anno.Index;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import java.util.List;
  */
 @Data
 @Index("user")
-public class User {
+public class User implements Serializable {
 
 	@Id(strategy = Id.STRATEGY_INCR)
 	String userId;
